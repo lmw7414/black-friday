@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   mysql-server:
     image: mysql
@@ -5,3 +7,23 @@ services:
       - MYSQL_ROOT_PASSWORD=1234
     ports:
       - "3306:3306"
+    networks:
+      - black-friday-network
+
+  member-service:
+    image: member-service
+    build: 
+      dockerfile: Dockerfile
+      context: ./MemberService
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    ports:
+      - "8081:8080"
+    depends_on:
+      - mysql-server
+    networks:
+      - black-friday-network
+      
+networks:
+  black-friday-network:
+    driver: bridge
