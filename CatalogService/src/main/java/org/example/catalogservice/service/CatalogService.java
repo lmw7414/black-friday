@@ -1,12 +1,12 @@
 package org.example.catalogservice.service;
 
+import blackfriday.protobuf.EdaMessage;
 import lombok.RequiredArgsConstructor;
 import org.example.catalogservice.cassandra.entity.Product;
 import org.example.catalogservice.cassandra.repository.ProductRepository;
-import org.example.catalogservice.dto.ProductTagsDto;
-import org.example.catalogservice.feign.SearchClient;
 import org.example.catalogservice.mysql.entity.SellerProduct;
 import org.example.catalogservice.mysql.repository.SellerProductRepository;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,8 +18,7 @@ public class CatalogService {
 
     private final SellerProductRepository sellerProductRepository;
     private final ProductRepository productRepository;
-    private final SearchClient searchClient;
-
+    private final KafkaTemplate<String, byte[]> kafkaTemplate;
 
     public Product registerProduct(
             Long sellerId,
@@ -41,14 +40,24 @@ public class CatalogService {
                 stockCount,
                 tags
         );
-
-        searchClient.addTagCache(new ProductTagsDto(product.id, tags));
+        var message = EdaMessage.ProductTags.newBuilder()
+                .setProductId(product.id)
+                .addAllTags(tags)
+                .build();
+        kafkaTemplate.send("product_tags_added", message.toByteArray());
         return productRepository.save(product);
     }
 
     public void deleteProduct(Long productId) {
         var product = productRepository.findById(productId);
-        product.ifPresent(value -> searchClient.removeTagCache(new ProductTagsDto(value.id, value.tags)));
+        if (product.isPresent()) {
+            var message = EdaMessage.ProductTags.newBuilder()
+                    .setProductId(product.get().id)
+                    .addAllTags(product.get().tags)
+                    .build();
+            kafkaTemplate.send("product_tags_removed", message.toByteArray());
+        }
+
 
         productRepository.deleteById(productId);
         sellerProductRepository.deleteById(productId);
