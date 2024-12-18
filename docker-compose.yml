@@ -24,6 +24,20 @@ services:
     networks:
       - black-friday-network
       
+  payment-service:
+    image: payment-service
+    build: 
+      dockerfile: Dockerfile
+      context: ./PaymentService
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    ports:
+      - "8082:8080"
+    depends_on:
+      - mysql-server
+    networks:
+      - black-friday-network
+
 networks:
   black-friday-network:
     driver: bridge
