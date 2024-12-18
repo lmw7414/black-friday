@@ -11,6 +11,6 @@ public interface SearchClient {
     @PostMapping(value = "/search/addTagCache")
     void addTagCache(@RequestBody ProductTagsDto dto);
 
-    @PostMapping(value = "/search/removeTageCache")
+    @PostMapping(value = "/search/removeTagCache")
     void removeTagCache(@RequestBody ProductTagsDto dto);
 }

@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.Map;
 
-@FeignClient(name = "PaymentClient", url = "http://payment-service:8080")
+@FeignClient(name = "paymentClient", url = "http://payment-service:8080")
 public interface PaymentClient {
-    @GetMapping(value = "/payment/users/{userId}")
+    @GetMapping(value = "/payment/users/{userId}/first-method")
     Map<String, Object> getPaymentMethod(@PathVariable Long userId);
 
     @PostMapping(value = "/payment/process-payment")
