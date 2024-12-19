@@ -1,7 +1,6 @@
 package org.example.deliveryserive.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.deliveryserive.dto.ProcessDeliveryDto;
 import org.example.deliveryserive.dto.RegisterAddressDto;
 import org.example.deliveryserive.entity.Delivery;
 import org.example.deliveryserive.entity.UserAddress;
@@ -21,16 +20,6 @@ public class DeliveryController {
                 dto.userId,
                 dto.address,
                 dto.alias
-        );
-    }
-
-    @PostMapping("/process-delivery")
-    public Delivery processDelivery(@RequestBody ProcessDeliveryDto dto) {
-        return deliveryService.processDelivery(
-                dto.orderId,
-                dto.productName,
-                dto.productCount,
-                dto.address
         );
     }
 
