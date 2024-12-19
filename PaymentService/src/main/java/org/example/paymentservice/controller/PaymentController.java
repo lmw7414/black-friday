@@ -2,7 +2,6 @@ package org.example.paymentservice.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.paymentservice.dto.PaymentMethodDto;
-import org.example.paymentservice.dto.ProcessPaymentDto;
 import org.example.paymentservice.entity.Payment;
 import org.example.paymentservice.entity.PaymentMethod;
 import org.example.paymentservice.service.PaymentService;
@@ -21,16 +20,6 @@ public class PaymentController {
                 dto.userId,
                 dto.paymentMethodType,
                 dto.creditCardNumber
-        );
-    }
-
-    @PostMapping("/process-payment")
-    public Payment processPayment(@RequestBody ProcessPaymentDto dto) throws Exception {
-        return paymentService.processPayment(
-                dto.userId,
-                dto.orderId,
-                dto.amountKRW,
-                dto.paymentMethodId
         );
     }
 
