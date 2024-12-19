@@ -49,8 +49,12 @@ public class EventListener {
         log.info("[delivery_status_update] consumed: {}", object);
 
         if(object.getDeliveryStatus().equals("REQUESTED")) {
-            // 상품 재고 감소
             var order = orderRepository.findById(object.getOrderId()).orElseThrow();
+            // deliveryId 저장
+            order.deliveryId = object.getDeliveryId();
+            orderRepository.save(order);
+
+            // 상품 재고 감소
             var decreaseStockCountDto = new DecreaseStockCountDto();
             decreaseStockCountDto.decreaseCount = order.count;
             catalogClient.decreaseStockCount(order.productId, decreaseStockCountDto);

@@ -3,6 +3,7 @@ plugins {
     id 'org.springframework.boot' version '3.4.0'
     id 'io.spring.dependency-management' version '1.1.6'
     id 'com.google.protobuf' version '0.9.4'
+    id 'jacoco'
 }
 
 group = 'org.example'
@@ -38,6 +39,8 @@ dependencies {
 
     runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'
+
+    testRuntimeOnly 'com.h2database:h2'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
@@ -50,10 +53,48 @@ dependencyManagement {
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
 }
 
 protobuf {
     protoc {
         artifact = 'com.google.protobuf:protoc:3.6.1:osx-x86_64'
+    }
+}
+
+// jacocoTestReport 대상에서 제외시킬 경로 지정
+private excludedClassFilesForReport(classDirectories) {
+    classDirectories.setFrom(
+            files(classDirectories.files.collect {
+                fileTree(dir: it, exclude: [
+                        "**/protobuf/**",
+                        "**/*Application*",
+                        "**/*Config*"
+                ])
+            })
+    )
+}
+
+jacocoTestReport {
+    dependsOn test	// 이 태스크 실행 전에 test 실행
+    finalizedBy jacocoTestCoverageVerification	// 이 태스크 실행 후에 jacocoTestCoverageVerification 실행
+    excludedClassFilesForReport(classDirectories)	// 제외 경로 설정
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            element = 'BUNDLE'	// 프로젝트 단위로
+
+            limit {
+                counter = 'LINE'		// 라인을 기준으로
+                value = 'COVEREDRATIO'	// 비율
+                minimum = 0.89			// 커버리지 89%를 최소 기준으로 잡음
+            }
+
+            includes = [	// 검증에 포함시킬 경로들
+                            'com.example.OrderService.service.**',
+            ]
+        }
     }
 }
